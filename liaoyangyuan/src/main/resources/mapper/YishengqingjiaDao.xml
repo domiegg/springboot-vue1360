@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.YishengqingjiaDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.yishengqingjia_name as yishengqingjiaName
+        ,a.yishengqingjia_text as yishengqingjiaText
+        ,a.qingjia_types as qingjiaTypes
+        ,a.yishengqingjia_time as yishengqingjiaTime
+        ,a.yishengqingjia_number as yishengqingjiaNumber
+        ,a.yisheng_id as yishengId
+        ,a.yishengqingjia_yesno_types as yishengqingjiaYesnoTypes
+        ,a.yishengqingjia_yesno_text as yishengqingjiaYesnoText
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.YishengqingjiaView" >
+        SELECT
+        <include refid="Base_Column_List" />
+
+--         级联表的字段
+        ,yisheng.yisheng_uuid_number as yishengUuidNumber
+        ,yisheng.yisheng_name as yishengName
+        ,yisheng.yisheng_phone as yishengPhone
+        ,yisheng.yisheng_photo as yishengPhoto
+
+        FROM yishengqingjia  a
+        left JOIN yisheng yisheng ON a.yisheng_id = yisheng.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test=" params.yishengqingjiaName != '' and params.yishengqingjiaName != null and params.yishengqingjiaName != 'null' ">
+                and a.yishengqingjia_name like CONCAT('%',#{params.yishengqingjiaName},'%')
+            </if>
+            <if test=" params.yishengqingjiaText != '' and params.yishengqingjiaText != null and params.yishengqingjiaText != 'null' ">
+                and a.yishengqingjia_text like CONCAT('%',#{params.yishengqingjiaText},'%')
+            </if>
+            <if test="params.qingjiaTypes != null and params.qingjiaTypes != ''">
+                and a.qingjia_types = #{params.qingjiaTypes}
+            </if>
+            <if test=" params.yishengqingjiaTimeStart != '' and params.yishengqingjiaTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.yishengqingjia_time) >= UNIX_TIMESTAMP(#{params.yishengqingjiaTimeStart}) ]]>
+            </if>
+            <if test=" params.yishengqingjiaTimeEnd != '' and params.yishengqingjiaTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.yishengqingjia_time) <= UNIX_TIMESTAMP(#{params.yishengqingjiaTimeEnd}) ]]>
+            </if>
+            <if test="params.yishengqingjiaNumberStart != null and params.yishengqingjiaNumberStart != ''">
+                <![CDATA[  and a.yishengqingjia_number >= #{params.yishengqingjiaNumberStart}   ]]>
+            </if>
+            <if test="params.yishengqingjiaNumberEnd != null and params.yishengqingjiaNumberEnd != ''">
+                <![CDATA[  and a.yishengqingjia_number <= #{params.yishengqingjiaNumberEnd}   ]]>
+            </if>
+             <if test="params.yishengqingjiaNumber != null and params.yishengqingjiaNumber != ''">
+                and a.yishengqingjia_number = #{params.yishengqingjiaNumber}
+             </if>
+            <if test="params.yishengId != null and params.yishengId != ''">
+                and (
+                    a.yisheng_id = #{params.yishengId}
+                )
+            </if>
+            <if test="params.yishengqingjiaYesnoTypes != null and params.yishengqingjiaYesnoTypes != ''">
+                and a.yishengqingjia_yesno_types = #{params.yishengqingjiaYesnoTypes}
+            </if>
+            <if test=" params.yishengqingjiaYesnoText != '' and params.yishengqingjiaYesnoText != null and params.yishengqingjiaYesnoText != 'null' ">
+                and a.yishengqingjia_yesno_text like CONCAT('%',#{params.yishengqingjiaYesnoText},'%')
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+
+                <!-- 判断医生的id不为空 -->
+            <if test=" params.yishengIdNotNull != '' and params.yishengIdNotNull != null and params.yishengIdNotNull != 'null' ">
+                and a.yisheng_id IS NOT NULL
+            </if>
+            <if test=" params.yishengUuidNumber != '' and params.yishengUuidNumber != null and params.yishengUuidNumber != 'null' ">
+                and yisheng.yisheng_uuid_number like CONCAT('%',#{params.yishengUuidNumber},'%')
+            </if>
+            <if test=" params.yishengName != '' and params.yishengName != null and params.yishengName != 'null' ">
+                and yisheng.yisheng_name like CONCAT('%',#{params.yishengName},'%')
+            </if>
+            <if test=" params.yishengPhone != '' and params.yishengPhone != null and params.yishengPhone != 'null' ">
+                and yisheng.yisheng_phone like CONCAT('%',#{params.yishengPhone},'%')
+            </if>
+        </where>
+
+        order by a.${params.orderBy} desc 
+    </select>
+
+</mapper>
